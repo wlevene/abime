@@ -1,0 +1,12 @@
+{
+  "name": "abime",
+  "packages":[
+  	"code.google.com/p/goprotobuf/proto",
+  	"github.com/garyburd/redigo/redis",
+  	"github.com/gizak/termui",
+  	"github.com/donnie4w/go-logger",
+	"github.com/pquerna/ffjson",
+	"github.com/moovweb/gokogiri",
+	"github.com/moovweb/gokogiri/xpath"
+  ]
+}

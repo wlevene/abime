@@ -1,0 +1,7 @@
+gom 'github.com/golang/protobuf', :comment => '68c687dc49948540b356a6b47931c9be4fcd0245'
+gom 'github.com/garyburd/redigo/redis'
+gom 'github.com/donnie4w/go-logger'
+gom 'github.com/gizak/termui'
+gom 'github.com/pquerna/ffjson'
+gom 'github.com/moovweb/gokogiri'
+gom 'github.com/moovweb/gokogiri/xpath'

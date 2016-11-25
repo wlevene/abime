@@ -1,0 +1,233 @@
+package protocol;
+
+enum CmdType
+{
+	SESSION							= 888;
+	SESSIONREPLY					= 889;
+	RECVDATAREPLY 					=  999;
+	
+	HTTP_DATA 						= 1000;
+	
+	SOCKET_CONNECT					= 1010;
+	SOCKET_SENDRECV_DATA 			= 1011;
+	
+	WEBVIEW_DATA 					= 1020;
+	
+	METHOD_DATA 					= 1030;
+	
+	UPDATE_NETWORK_STATUS			= 1040;
+	
+	MEMORY_WARING		    		= 1050;
+	
+	MAINTHREAD_ANR		 			= 1060;
+	
+	METRIC_DATA						= 1070;
+	BATTERY_DATA					= 1071;
+	
+	FPS_DATA						= 1072; // 部分设备全数据收集时的协议
+	FPS_CALAMITY_DATA				= 1073; // bug fps上报协议
+	
+};
+
+enum HttpErrorType
+{
+	HttpErrorType_HTTP				= 1;
+	HttpErrorType_Network			= 2;
+};
+
+enum MetricType
+{
+	Metric_Normal 					= 1;
+	Metric_Dot 						= 2;
+	Metric_DotStart 				= 3;
+	Metric_DotEnd 					= 4;
+};
+
+
+message SessionMessage
+{
+	required string appkey = 1;
+	
+	message AppInfo
+	{
+		required string name 		= 1;
+		required string packageID 	= 2;
+		required string appVersion 	= 3;
+		
+	};
+	
+	required AppInfo app = 2;
+	
+	message DeviceInfo
+	{
+		required string deviceName 	= 1;
+		required string osName 		= 2;
+		required string osVersion 	= 3;
+		required string screenSize 	= 4;
+		required string deviceID 	= 5;
+		required bool rooted 		= 6;
+		optional string deviceCode 	= 7;
+	};
+
+	required DeviceInfo device = 3; 
+	required string session_id = 4;
+	required string sdkVersion = 5; 
+};
+
+message MessageReply
+{
+	required bool ret          		= 1;		// ios 无法使用reuslt 做为字段名
+	required int32 probability	    = 2;
+	optional string message   	    = 3;
+};
+
+
+message RecvDataReply
+{
+	required bool recved          	= 1;
+	optional string message   	    = 3;
+};
+
+message AppNetWorkStatus
+{
+	required string networkName 	= 1;
+	required string carrierName     = 2;
+};
+
+message HttpResponse
+{
+	required int32 statusCode = 1;
+	optional string headerField = 2;	
+};
+
+message HttpError
+{
+	required int32 errorCode 			= 1;
+	required string errorMessage   		= 2;
+	required HttpErrorType errorType    = 3;
+	optional string responseContent		= 4;
+	optional string headerField 		= 5;
+};
+
+message HttpData
+{
+	required string url 			= 1;
+	required double castTime		= 2;
+	
+	optional HttpError error		= 3;
+	
+	required int32  responseSize 	= 4;
+	required int32  requestSize 	= 5;
+	
+//	optional HttpResponse response  = 6;
+};
+
+message SocketConnect
+{
+	required string remoteIp 		= 1;
+	required int32 remotePort 		= 2;
+	required double castTime 		= 3;
+	
+	required int32  errnoCode 		= 4;
+	required string erronMesage 	= 5;
+};
+
+message SocketSendRecvData
+{
+	required string remoteIp 		= 1;
+	required int32 remotePort 		= 2;
+	required double castTime 		= 3;
+	required int32  errnoCode 		= 4;
+	required string erronMesage 	= 5;
+	required string methodName 		= 6;
+	required int32 dataSize	 		= 7;
+};
+
+message MethodData
+{
+	required string methodName 		= 1;
+	required string className 		= 2;
+	required double castTime 		= 3;
+	required bool isMainThread 		= 4;
+	required string params			= 5;  // 将函数的参数转为string 传输， 如有多个参数就用空格分隔
+	repeated MetricData metricDatas = 6;
+};
+
+message WebViewData 
+{
+	required string url				= 1;
+	required double castTime 		= 2;
+	required string webviewName		= 3;
+	required int32  errnoCode 		= 4;
+	required string erronMesage 	= 5;
+};
+
+
+message MemoryWaringData
+{
+	required double usedMemory     	= 1;
+};
+
+message ThreadANR
+{
+	required int32 theadID 			= 1;
+	required int64 startANR 		= 2;
+	required int32 durationANR 		= 3;  // 超过0.5s的才会上报
+	
+	optional string threadDump		= 4;
+};
+
+message MetricData
+{
+	optional float fps 				= 1;
+	optional float cpu 				= 2;
+	optional int32 startBattery 	= 3;
+	optional int32 currentBattery 	= 4;    // 客户端如果在charging 那么客户端不上报电量相关，并将startBattery设置为最终的充电电量
+	
+	required MetricType metricType = 5;
+	
+	message MetricMemoryData
+	{
+		optional float vss 			= 1;
+		optional float uss 			= 2;
+		optional float pss 			= 3;
+		optional float rss 			= 4;
+		optional float total 		= 5;
+		optional float free 		= 6;
+	};
+	
+	optional MetricMemoryData memory 	= 6;
+	optional string metricName 			= 7;
+	optional int32 time					= 8; 	// 指定一个时间，用来在报表中展示
+};
+
+// 今日耗电量， 每分钟收集一次，每5分钟上报一次，最多上报半小时， 
+// 比如还可以添加每天收集200台设备就不再收集的规则
+// 清零时间可以放在早上6点
+// 客户端如果在charging 那么客户端不上报电量相关，本次收集停止
+
+message BatteryData
+{
+	message BatteryItemData
+	{
+		required int32 currentBattery 	= 1;  
+		required int32 timeSection		= 2;  // 以开始启动app为0 然后每分钟累加
+	}
+	
+	required int32 startBattery 		= 1;	
+	repeated  BatteryItemData Batterys 	= 2;
+};
+
+message FpsData
+{
+	required int32 	fps					= 1;
+	required int32 	timeSection			= 2; // 时间单位:s
+	optional string note				= 3; // 用户自定义数据，可以是脚本堆栈等任何信息，格式由开发者定义
+	optional bytes 	snapShot			= 4; // 如果fps底于指定的值就将当时的截图传上来
+	
+	// fps 图片存储目录结构: /appkey/sessionid/time.jpg	
+}
+
+
+
+

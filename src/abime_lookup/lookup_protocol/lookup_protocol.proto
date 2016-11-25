@@ -1,0 +1,21 @@
+package lookup_protocol
+
+enum LookUpCMD 
+{
+	REGISTER_ABIME 			= 1;
+	UNREGISTER_ABIME 		= 2;
+	
+	REPORT_PERFORMANCE 		= 4;
+};
+
+
+message AbimeData
+{
+	required string abimeAddr = 1; // x.x.x.x:80
+	required string abimeName = 2;
+};
+
+message AbimePerformance
+{
+	required int64 clientCount = 1
+};
