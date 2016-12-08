@@ -46,25 +46,6 @@ func init() {
 }
 
 func main() {
-
-	u, err := url.Parse("redis://123.123.123.123:123/3?pwd=12")
-	if err != nil {
-//		log.Fatal(err)
-	}
-	
-	fmt.Println("host:", u.Host)
-	fmt.Println("path:", strings.Trim(u.Path,"/"))
-	fmt.Println("Scheme:", u.Scheme)
-	fmt.Println("RawQuery:", u.Query().Get("pwd"))
-	
-	return
-	
-	rand := rand.New(rand.NewSource(time.Now().UnixNano()))
-	randValue := rand.Intn(10)
-	
-	fmt.Println(randValue)
-	
-	return
 	
 	flagSet.Parse(os.Args[1:])
 
